@@ -47,7 +47,7 @@ contract MerkleAirdropTest is Test {
 
     function testClaimShouldRevertIfClaimerHasAlreadyClaimed() public {
         airdrop.claim(user, amount, proof);
-        
+
         vm.expectRevert(MerkleAirdrop.MerkleAirdrop__AlreadyClaimed.selector);
 
         airdrop.claim(user, 100, new bytes32[](0));
