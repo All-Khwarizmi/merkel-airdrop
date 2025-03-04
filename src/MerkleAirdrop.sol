@@ -59,7 +59,7 @@ contract MerkleAirdrop is Ownable, EIP712 {
             revert MerkleAirdrop__AlreadyClaimed();
         }
 
-        if (!_isValidSignature(account, getMessage(account, amount), v, r, s)) {
+        if (!_isValidSignature(account, getMessageHash(account, amount), v, r, s)) {
             revert MerkleAirdrop__InvalidSignature();
         }
 
@@ -75,7 +75,7 @@ contract MerkleAirdrop is Ownable, EIP712 {
         i_airdropToken.safeTransfer(account, amount);
     }
 
-    function getMessage(address account, uint256 amount) public view returns (bytes32) {
+    function getMessageHash(address account, uint256 amount) public view returns (bytes32) {
         return _hashTypedDataV4(keccak256(abi.encode(MESSAGE_TYPEHASH, AirdropClaim(account, amount))));
     }
 

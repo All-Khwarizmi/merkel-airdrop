@@ -17,10 +17,13 @@ contract MerkleAirdropTest is Test {
     uint256 constant amount = 25 * 1e18;
 
     address user;
+    address gasPayer;
     uint256 privateKey;
 
     function setUp() public {
         (user, privateKey) = makeAddrAndKey("user");
+        gasPayer = makeAddr("gasPayer");
+        vm.deal(gasPayer, 100 ether);
 
         (airdrop, tacoToken) = new DeployScript().run();
 
@@ -34,22 +37,53 @@ contract MerkleAirdropTest is Test {
         assertEq(airdrop.getMerkleRoot(), merkleRoot);
     }
 
+    function testUserCanClaim() public {
+        uint256 userBalanceBefore = tacoToken.balanceOf(user);
+
+        bytes32 messageHash = airdrop.getMessageHash(user, amount);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, messageHash);
+
+        vm.prank(gasPayer);
+        airdrop.claim(user, amount, proof, v, r, s);
+
+        uint256 userBalanceAfter = tacoToken.balanceOf(user);
+
+        assertEq(userBalanceAfter, userBalanceBefore + amount);
+    }
+
     function testClaimShouldRevertIfProofIsInvalid() public {
+        bytes32 messageHash = airdrop.getMessageHash(user, amount);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, messageHash);
+
         vm.expectRevert(MerkleAirdrop.MerkleAirdrop__InvalidProof.selector);
 
-        airdrop.claim(user, 100, new bytes32[](0));
+        vm.prank(gasPayer);
+        airdrop.claim(user, amount, new bytes32[](0), v, r, s);
     }
 
     function testClaimShouldSetHaClaimFlagToTrue() public {
-        airdrop.claim(user, amount, proof);
+        bytes32 messageHash = airdrop.getMessageHash(user, amount);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, messageHash);
+
+        vm.prank(gasPayer);
+        airdrop.claim(user, amount, proof, v, r, s);
+
         assert(airdrop.getClaimerHasClaimed(user));
     }
 
     function testClaimShouldRevertIfClaimerHasAlreadyClaimed() public {
-        airdrop.claim(user, amount, proof);
+        bytes32 messageHash = airdrop.getMessageHash(user, amount);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, messageHash);
+
+        vm.prank(gasPayer);
+        airdrop.claim(user, amount, proof, v, r, s);
 
         vm.expectRevert(MerkleAirdrop.MerkleAirdrop__AlreadyClaimed.selector);
 
-        airdrop.claim(user, 100, new bytes32[](0));
+        airdrop.claim(user, 100, new bytes32[](0), v, r, s);
     }
 }
