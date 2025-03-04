@@ -8,7 +8,7 @@ const tree = StandardMerkleTree.load(
 
 // (2)
 for (const [i, v] of tree.entries()) {
-  if (v[0] === "0x1111111111111111111111111111111111111111") {
+  if (v[0] === "0x6666666666666666666666666666666666666666") {
     // (3)
     const proof = tree.getProof(i);
     console.log("Value:", v);

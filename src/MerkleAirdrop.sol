@@ -23,8 +23,9 @@ pragma solidity 0.8.24;
 
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MerkleAirdrop {
+contract MerkleAirdrop is Ownable {
     error MerkleAirdrop__InvalidProof();
     error MerkleAirdrop__AlreadyClaimed();
 
@@ -38,25 +39,35 @@ contract MerkleAirdrop {
 
     event Claim(address claimer, uint256 amount);
 
-    constructor(IERC20 airdropToken, bytes32 merkleRoot) {
+    constructor(IERC20 airdropToken, bytes32 merkleRoot) Ownable() {
         i_airdropToken = airdropToken;
         i_merkleRoot = merkleRoot;
     }
 
-    function claim(address claimer, uint256 amount, bytes32[] calldata proof) public {
-        if (hasClaim[claimer]) {
+    function claim(uint256 amount, bytes32[] calldata proof) public {
+        if (hasClaim[msg.sender]) {
             revert MerkleAirdrop__AlreadyClaimed();
         }
-        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(claimer, amount))));
+        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(msg.sender, amount))));
 
         if (!MerkleProof.verify(proof, i_merkleRoot, leaf)) {
             revert MerkleAirdrop__InvalidProof();
         }
 
-        hasClaim[claimer] = true;
+        hasClaim[msg.sender] = true;
 
-        emit Claim(claimer, amount);
-        i_airdropToken.safeTransfer(claimer, amount);
+        emit Claim(msg.sender, amount);
+        i_airdropToken.safeTransfer(msg.sender, amount);
+    }
+
+    function setClaimer(address claimer) public onlyOwner {
+        claimers.push(claimer);
+    }
+
+    function setHasClaimed(address[] calldata _claimers) public onlyOwner {
+        for (uint256 i = 0; i < _claimers.length; i++) {
+            hasClaim[claimers[i]] = true;
+        }
     }
 
     function getMerkleRoot() public view returns (bytes32) {
