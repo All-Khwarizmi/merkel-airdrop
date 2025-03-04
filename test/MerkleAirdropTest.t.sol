@@ -37,23 +37,19 @@ contract MerkleAirdropTest is Test {
     function testClaimShouldRevertIfProofIsInvalid() public {
         vm.expectRevert(MerkleAirdrop.MerkleAirdrop__InvalidProof.selector);
 
-        vm.prank(user);
-        airdrop.claim(100, new bytes32[](0));
+        airdrop.claim(user, 100, new bytes32[](0));
     }
 
     function testClaimShouldSetHaClaimFlagToTrue() public {
-        vm.prank(user);
-        airdrop.claim(amount, proof);
+        airdrop.claim(user, amount, proof);
         assert(airdrop.getClaimerHasClaimed(user));
     }
 
     function testClaimShouldRevertIfClaimerHasAlreadyClaimed() public {
-        vm.prank(user);
-        airdrop.claim(amount, proof);
+        airdrop.claim(user, amount, proof);
         
         vm.expectRevert(MerkleAirdrop.MerkleAirdrop__AlreadyClaimed.selector);
 
-        vm.prank(user);
-        airdrop.claim(100, new bytes32[](0));
+        airdrop.claim(user, 100, new bytes32[](0));
     }
 }

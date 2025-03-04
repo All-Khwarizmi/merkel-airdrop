@@ -44,22 +44,21 @@ contract MerkleAirdrop is Ownable {
         i_merkleRoot = merkleRoot;
     }
 
-    function claim(uint256 amount, bytes32[] calldata proof) public {
-        if (hasClaim[msg.sender]) {
+    function claim(address account, uint256 amount, bytes32[] calldata proof) public {
+        if (hasClaim[account]) {
             revert MerkleAirdrop__AlreadyClaimed();
         }
-        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(msg.sender, amount))));
+        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
 
         if (!MerkleProof.verify(proof, i_merkleRoot, leaf)) {
             revert MerkleAirdrop__InvalidProof();
         }
 
-        hasClaim[msg.sender] = true;
+        hasClaim[account] = true;
 
-        emit Claim(msg.sender, amount);
-        i_airdropToken.safeTransfer(msg.sender, amount);
+        emit Claim(account, amount);
+        i_airdropToken.safeTransfer(account, amount);
     }
-
 
     function getMerkleRoot() public view returns (bytes32) {
         return i_merkleRoot;
