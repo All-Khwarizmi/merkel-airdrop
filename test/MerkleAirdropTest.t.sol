@@ -7,6 +7,7 @@ import {TacoToken} from "../src/TacoToken.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {ReadTreeScript} from "../script/ReadTree.s.sol";
+import {DeployScript} from "../script/Deploy.s.sol";
 
 contract MerkleAirdropTest is Test {
     TacoToken tacoToken;
@@ -21,12 +22,7 @@ contract MerkleAirdropTest is Test {
     function setUp() public {
         (user, privateKey) = makeAddrAndKey("user");
 
-        tacoToken = new TacoToken();
-
-        // merkleRoot = new ReadTreeScript().getMerkleRoot();
-        airdrop = new MerkleAirdrop(IERC20(address(tacoToken)), merkleRoot);
-
-        tacoToken.mint(address(airdrop), amount);
+        (airdrop, tacoToken) = new DeployScript().run();
 
         proof = new bytes32[](2);
 
@@ -38,24 +34,6 @@ contract MerkleAirdropTest is Test {
         assertEq(airdrop.getMerkleRoot(), merkleRoot);
     }
 
-
-    modifier setClaimer() {
-        airdrop.setClaimer(user);
-        address[] memory claimers = new address[](1);
-        claimers[0] = user;
-        airdrop.setHasClaimed(claimers);
-
-        assert(airdrop.getClaimerHasClaimed(user));
-        _;
-    }
-
-    function testClaimShouldRevertIfClaimerHasAlreadyClaimed() public setClaimer {
-        vm.expectRevert(MerkleAirdrop.MerkleAirdrop__AlreadyClaimed.selector);
-
-        vm.prank(user);
-        airdrop.claim(100, new bytes32[](0));
-    }
-
     function testClaimShouldRevertIfProofIsInvalid() public {
         vm.expectRevert(MerkleAirdrop.MerkleAirdrop__InvalidProof.selector);
 
@@ -64,9 +42,18 @@ contract MerkleAirdropTest is Test {
     }
 
     function testClaimShouldSetHaClaimFlagToTrue() public {
-        console.log("user", user);
         vm.prank(user);
         airdrop.claim(amount, proof);
         assert(airdrop.getClaimerHasClaimed(user));
+    }
+
+    function testClaimShouldRevertIfClaimerHasAlreadyClaimed() public {
+        vm.prank(user);
+        airdrop.claim(amount, proof);
+        
+        vm.expectRevert(MerkleAirdrop.MerkleAirdrop__AlreadyClaimed.selector);
+
+        vm.prank(user);
+        airdrop.claim(100, new bytes32[](0));
     }
 }

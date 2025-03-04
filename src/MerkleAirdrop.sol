@@ -60,15 +60,6 @@ contract MerkleAirdrop is Ownable {
         i_airdropToken.safeTransfer(msg.sender, amount);
     }
 
-    function setClaimer(address claimer) public onlyOwner {
-        claimers.push(claimer);
-    }
-
-    function setHasClaimed(address[] calldata _claimers) public onlyOwner {
-        for (uint256 i = 0; i < _claimers.length; i++) {
-            hasClaim[claimers[i]] = true;
-        }
-    }
 
     function getMerkleRoot() public view returns (bytes32) {
         return i_merkleRoot;
