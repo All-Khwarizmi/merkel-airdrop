@@ -26,6 +26,7 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 
 contract MerkleAirdrop {
     error MerkleAirdrop__InvalidProof();
+    error MerkleAirdrop__AlreadyClaimed();
 
     using SafeERC20 for IERC20;
 
@@ -33,6 +34,7 @@ contract MerkleAirdrop {
     IERC20 private immutable i_airdropToken;
 
     address[] public claimers;
+    mapping(address => bool) private hasClaim;
 
     event Claim(address claimer, uint256 amount);
 
@@ -42,13 +44,26 @@ contract MerkleAirdrop {
     }
 
     function claim(address claimer, uint256 amount, bytes32[] calldata proof) public {
+        if (hasClaim[claimer]) {
+            revert MerkleAirdrop__AlreadyClaimed();
+        }
         bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(claimer, amount))));
 
         if (!MerkleProof.verify(proof, i_merkleRoot, leaf)) {
             revert MerkleAirdrop__InvalidProof();
         }
 
+        hasClaim[claimer] = true;
+
         emit Claim(claimer, amount);
         i_airdropToken.safeTransfer(claimer, amount);
+    }
+
+    function getMerkleRoot() public view returns (bytes32) {
+        return i_merkleRoot;
+    }
+
+    function getClaimerHasClaimed(address claimer) public view returns (bool) {
+        return hasClaim[claimer];
     }
 }
