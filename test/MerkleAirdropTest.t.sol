@@ -11,31 +11,33 @@ import {ReadTreeScript} from "../script/ReadTree.s.sol";
 contract MerkleAirdropTest is Test {
     TacoToken tacoToken;
     MerkleAirdrop airdrop;
-    bytes32 merkleRoot;
+    bytes32 merkleRoot = 0xaa5d581231e596618465a56aa0f5870ba6e20785fe436d5bfb82b08662ccc7c4;
     bytes32[] proof;
-    uint256 constant amount = 1000000000000000000;
+    uint256 constant amount = 25 * 1e18;
 
-    address user = makeAddr("0x6666666666666666666666666666666666666666");
+    address user;
+    uint256 privateKey;
 
     function setUp() public {
+        (user, privateKey) = makeAddrAndKey("user");
+
         tacoToken = new TacoToken();
-        merkleRoot = new ReadTreeScript().getMerkleRoot();
+
+        // merkleRoot = new ReadTreeScript().getMerkleRoot();
         airdrop = new MerkleAirdrop(IERC20(address(tacoToken)), merkleRoot);
 
-        proof = new bytes32[](3);
+        tacoToken.mint(address(airdrop), amount);
 
-        proof[0] = 0x76b785cc4507bdc43cee4e101cebf2593dea5be9a67ec8d73618c7408ea11a31;
-        proof[1] = 0x36a4737d5cf925b6a812d376c062ec9d663d9f18284285d3a3ffc62ab747ebbb;
-        proof[2] = 0x374e1c14ad60f4a285f936df56a187dd5803d7cfe382d50103a9428d791539a8;
+        proof = new bytes32[](2);
+
+        proof[0] = 0x0fd7c981d39bece61f7499702bf59b3114a90e66b51ba2c53abdf7b62986c00a;
+        proof[1] = 0xe5ebd1e1b5a5478a944ecab36a9a954ac3b6b8216875f6524caa7a1d87096576;
     }
 
     function testMerkleRootIsCorrect() public {
         assertEq(airdrop.getMerkleRoot(), merkleRoot);
     }
 
-    function testTacoTokenIsCorrect() public {
-        assertEq(tacoToken.balanceOf(address(airdrop)), 0);
-    }
 
     modifier setClaimer() {
         airdrop.setClaimer(user);
@@ -64,7 +66,7 @@ contract MerkleAirdropTest is Test {
     function testClaimShouldSetHaClaimFlagToTrue() public {
         console.log("user", user);
         vm.prank(user);
-        airdrop.claim(1000000000000000000, proof);
+        airdrop.claim(amount, proof);
         assert(airdrop.getClaimerHasClaimed(user));
     }
 }
