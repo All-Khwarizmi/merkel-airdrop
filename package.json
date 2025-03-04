@@ -1,0 +1,27 @@
+{
+  "name": "merkel-airdrop",
+  "version": "1.0.0",
+  "description": "An airdrop contract for the TacoToken that uses merkle proofs to verify the airdrop recipients.",
+  "main": "tree.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "run": "node tree.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/All-Khwarizmi/merkel-airdrop.git"
+  },
+  "keywords": [],
+  "author": "Jason Suárez",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/All-Khwarizmi/merkel-airdrop/issues"
+  },
+  "homepage": "https://github.com/All-Khwarizmi/merkel-airdrop#readme",
+  "dependencies": {
+    "@openzeppelin/merkle-tree": "^1.0.8"
+  }
+}
