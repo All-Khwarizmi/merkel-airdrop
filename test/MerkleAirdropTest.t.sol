@@ -7,7 +7,7 @@ import {TacoToken} from "../src/TacoToken.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {ReadTreeScript} from "../script/ReadTree.s.sol";
-import {DeployScript} from "../script/Deploy.s.sol";
+import {DeployMerkleAirdrop} from "../script/DeployMerkleAirdrop.s.sol";
 
 contract MerkleAirdropTest is Test {
     TacoToken tacoToken;
@@ -25,7 +25,7 @@ contract MerkleAirdropTest is Test {
         gasPayer = makeAddr("gasPayer");
         vm.deal(gasPayer, 100 ether);
 
-        (airdrop, tacoToken) = new DeployScript().run();
+        (airdrop, tacoToken) = new DeployMerkleAirdrop().run();
 
         proof = new bytes32[](2);
 
