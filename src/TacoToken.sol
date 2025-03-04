@@ -2,9 +2,13 @@
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TacoToken is ERC20 {
+contract TacoToken is ERC20, Ownable {
     constructor() ERC20("TacoToken", "TACO") {
-        _mint(msg.sender, 1000 * 10 ** 18);
+    }
+
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
     }
 }
