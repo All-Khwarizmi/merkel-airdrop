@@ -20,7 +20,7 @@ contract InteractScript is Script {
     function run() public {
         address mostRecentDeployedContract = DevOpsTools.get_most_recent_deployment("MerkleAirdrop", block.chainid);
 
-        claimAirdrop();
+        claimAirdrop(mostRecentDeployedContract);
     }
 
     function claimAirdrop(address airdropContractAddress) public {

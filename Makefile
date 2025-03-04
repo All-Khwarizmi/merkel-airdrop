@@ -18,7 +18,7 @@ clean  :; forge clean
 # Remove modules
 remove :; rm -rf .gitmodules && rm -rf .git/modules/* && rm -rf lib && touch .gitmodules && git add . && git commit -m "modules"
 
-install :; forge install cyfrin/foundry-devops@0.1.0  && forge install smartcontractkit/chainlink-brownie-contracts@0.6.1  && forge install foundry-rs/forge-std@v1.5.3  && forge install openzeppelin/openzeppelin-contracts@v4.8.3  && forge install dmfxyz/murky 
+install :; forge install cyfrin/foundry-devops@0.3.2  && forge install foundry-rs/forge-std@v1.9.6  && forge install openzeppelin/openzeppelin-contracts@v4.8.3   && forge install dmfxyz/murky 
 
 
 # Update Dependencies
@@ -43,5 +43,5 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 endif
 
 deploy:
-	@forge script script/DeployDSC.s.sol:DeployDSC $(NETWORK_ARGS)
+	@forge script script/DeployMerkleAirdrop.s.sol:DeployMerkleAirdrop $(NETWORK_ARGS)
 
